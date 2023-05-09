@@ -5,7 +5,9 @@ Includes:
   - Score calculations that take into account the board's complexity, the difficulty selected, and the user's time.
 
 ## Running the Program
-You just need to download the repository and run main.py
+- Download the repository and run main.py
+- From there, select a difficulty level to play the game.
+- The game continues until the user uncovers a mine or all safe tiles have been uncovered.
 
 ## Game controls
 - Left-click a tile to uncover it.
