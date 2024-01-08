@@ -8,6 +8,7 @@ import pygame
 import random
 import sys
 import time
+import copy
 from tkinter import *
 from tkinter import messagebox
 
@@ -22,13 +23,6 @@ grid_sizes = ((10, 10), (16, 16), (16, 30))
 
 
 class Cell:
-    def __init__(self, mine):
-        self.clicked = False
-        self.mine = mine
-        self.marked = False
-
-
-class Score_Cell:
     def __init__(self, mine):
         self.clicked = False
         self.mine = mine
@@ -198,296 +192,150 @@ menu.mainloop()
 game_over = False
 
 
-def dfs_minesweeper(x, y):
+def dfs_minesweeper(x, y, board):
     if adjacent_bombs[x][y] != 0 or board[x][y].marked:
         return  # Only perform search if the tile clicked was an empty one (AKA no numbers or mines).
     if x == 0:
         if y == 0:
             if board[1][0].clicked == False and adjacent_bombs[1][0] >= 0:
                 board[1][0].clicked = True
-                dfs_minesweeper(1, 0)
+                dfs_minesweeper(1, 0, board)
             if board[0][1].clicked == False and adjacent_bombs[0][1] >= 0:
                 board[0][1].clicked = True
-                dfs_minesweeper(0, 1)
+                dfs_minesweeper(0, 1, board)
             if board[1][1].clicked == False and adjacent_bombs[1][1] >= 0:
                 board[1][1].clicked = True
-                dfs_minesweeper(x + 1, y + 1)
+                dfs_minesweeper(x + 1, y + 1, board)
         elif y + 1 == len(adjacent_bombs[x]):
             if board[1][y].clicked == False and adjacent_bombs[1][y] >= 0:
                 board[1][y].clicked = True
-                dfs_minesweeper(1, y)
+                dfs_minesweeper(1, y, board)
             if board[0][y - 1].clicked == False and adjacent_bombs[0][y - 1] >= 0:
                 board[0][y - 1].clicked = True
-                dfs_minesweeper(0, y - 1)
+                dfs_minesweeper(0, y - 1, board)
             if board[1][y - 1].clicked == False and adjacent_bombs[1][y - 1] >= 0:
                 board[1][y - 1].clicked = True
-                dfs_minesweeper(x + 1, y - 1)
+                dfs_minesweeper(x + 1, y - 1, board)
         else:
             # Cardinal
             if board[x][y - 1].clicked == False and adjacent_bombs[x][y - 1] >= 0:
                 board[x][y - 1].clicked = True
-                dfs_minesweeper(x, y - 1)
+                dfs_minesweeper(x, y - 1, board)
             if board[x][y + 1].clicked == False and adjacent_bombs[x][y + 1] >= 0:
                 board[x][y + 1].clicked = True
-                dfs_minesweeper(x, y + 1)
+                dfs_minesweeper(x, y + 1, board)
             if board[x + 1][y].clicked == False and adjacent_bombs[x + 1][y] >= 0:
                 board[x + 1][y].clicked = True
-                dfs_minesweeper(x + 1, y)
+                dfs_minesweeper(x + 1, y, board)
             # Diagonal
             if board[x + 1][y - 1].clicked == False and adjacent_bombs[x + 1][y - 1] >= 0:
                 board[x + 1][y - 1].clicked = True
-                dfs_minesweeper(x + 1, y + 1)
+                dfs_minesweeper(x + 1, y + 1, board)
             if board[x + 1][y + 1].clicked == False and adjacent_bombs[x + 1][y + 1] >= 0:
                 board[x + 1][y + 1].clicked = True
-                dfs_minesweeper(x + 1, y + 1)
+                dfs_minesweeper(x + 1, y + 1, board)
     elif x + 1 == len(adjacent_bombs):
         if y == 0:
             if board[x - 1][0].clicked == False and adjacent_bombs[x - 1][0] >= 0:
                 board[x - 1][0].clicked = True
-                dfs_minesweeper(x - 1, 0)
+                dfs_minesweeper(x - 1, 0, board)
             if board[x][1].clicked == False and adjacent_bombs[x][1] >= 0:
                 board[x][1].clicked = True
-                dfs_minesweeper(x, 1)
+                dfs_minesweeper(x, 1, board)
             if board[x - 1][1].clicked == False and adjacent_bombs[x - 1][1] >= 0:
                 board[x - 1][1].clicked = True
-                dfs_minesweeper(x - 1, y + 1)
+                dfs_minesweeper(x - 1, y + 1, board)
         elif y + 1 == len(adjacent_bombs[x]):
             if adjacent_bombs[x - 1][y] >= 0 and board[x - 1][y].clicked == False:
                 board[x - 1][y].clicked = True
-                dfs_minesweeper(x - 1, y)
+                dfs_minesweeper(x - 1, y, board)
             if adjacent_bombs[x][y - 1] >= 0 and board[x][y - 1].clicked == False:
                 board[x][y - 1].clicked = True
-                dfs_minesweeper(x, y - 1)
+                dfs_minesweeper(x, y - 1, board)
             if adjacent_bombs[x - 1][y - 1] >= 0 and board[x - 1][y - 1].clicked == False:
                 board[x - 1][y - 1].clicked = True
-                dfs_minesweeper(x - 1, y - 1)
+                dfs_minesweeper(x - 1, y - 1), board
         else:
             # Cardinal
             if adjacent_bombs[x][y - 1] >= 0 and board[x][y - 1].clicked == False:
                 board[x][y - 1].clicked = True
-                dfs_minesweeper(x, y - 1)
+                dfs_minesweeper(x, y - 1, board)
             if adjacent_bombs[x][y + 1] >= 0 and board[x][y + 1].clicked == False:
                 board[x][y + 1].clicked = True
-                dfs_minesweeper(x, y + 1)
+                dfs_minesweeper(x, y + 1, board)
             if adjacent_bombs[x - 1][y] >= 0 and board[x - 1][y].clicked == False:
                 board[x - 1][y].clicked = True
-                dfs_minesweeper(x - 1, y)
+                dfs_minesweeper(x - 1, y, board)
             # Diagonal
             if adjacent_bombs[x - 1][y - 1] >= 0 and board[x - 1][y - 1].clicked == False:
                 board[x - 1][y - 1].clicked = True
-                dfs_minesweeper(x - 1, y - 1)
+                dfs_minesweeper(x - 1, y - 1, board)
             if adjacent_bombs[x - 1][y + 1] >= 0 and board[x - 1][y + 1].clicked == False:
                 board[x - 1][y + 1].clicked = True
-                dfs_minesweeper(x - 1, y + 1)
+                dfs_minesweeper(x - 1, y + 1, board)
     else:
         if y == 0:
             # Cardinal
             if adjacent_bombs[x + 1][y] >= 0 and board[x + 1][y].clicked == False:
                 board[x + 1][y].clicked = True
-                dfs_minesweeper(x + 1, y)
+                dfs_minesweeper(x + 1, y, board)
             if adjacent_bombs[x][y + 1] >= 0 and board[x][y + 1].clicked == False:
                 board[x][y + 1].clicked = True
-                dfs_minesweeper(x, y + 1)
+                dfs_minesweeper(x, y + 1, board)
             if adjacent_bombs[x - 1][y] >= 0 and board[x - 1][y].clicked == False:
                 board[x - 1][y].clicked = True
-                dfs_minesweeper(x - 1, y)
+                dfs_minesweeper(x - 1, y, board)
             # Diagonal
             if adjacent_bombs[x + 1][y + 1] >= 0 and board[x + 1][y + 1].clicked == False:
                 board[x + 1][y + 1].clicked = True
-                dfs_minesweeper(x + 1, y + 1)
+                dfs_minesweeper(x + 1, y + 1, board)
             if adjacent_bombs[x - 1][y + 1] >= 0 and board[x - 1][y + 1].clicked == False:
                 board[x - 1][y + 1].clicked = True
-                dfs_minesweeper(x - 1, y + 1)
+                dfs_minesweeper(x - 1, y + 1, board)
         elif y + 1 == len(adjacent_bombs[x]):
             if adjacent_bombs[x + 1][y] >= 0 and board[x + 1][y].clicked == False:
                 board[x + 1][y].clicked = True
-                dfs_minesweeper(x + 1, y)
+                dfs_minesweeper(x + 1, y, board)
             if adjacent_bombs[x][y - 1] >= 0 and board[x][y - 1].clicked == False:
                 board[x][y - 1].clicked = True
-                dfs_minesweeper(x, y - 1)
+                dfs_minesweeper(x, y - 1, board)
             if adjacent_bombs[x - 1][y] >= 0 and board[x - 1][y].clicked == False:
                 board[x - 1][y].clicked = True
-                dfs_minesweeper(x - 1, y)
+                dfs_minesweeper(x - 1, y, board)
             # Diagonal
             if adjacent_bombs[x + 1][y - 1] >= 0 and board[x + 1][y - 1].clicked == False:
                 board[x + 1][y - 1].clicked = True
-                dfs_minesweeper(x + 1, y - 1)
+                dfs_minesweeper(x + 1, y - 1, board)
             if adjacent_bombs[x - 1][y - 1] >= 0 and board[x - 1][y - 1].clicked == False:
                 board[x - 1][y - 1].clicked = True
-                dfs_minesweeper(x - 1, y - 1)
+                dfs_minesweeper(x - 1, y - 1, board)
         else:
             # Cardinal
             if adjacent_bombs[x + 1][y] >= 0 and board[x + 1][y].clicked == False:
                 board[x + 1][y].clicked = True
-                dfs_minesweeper(x + 1, y)
+                dfs_minesweeper(x + 1, y, board)
             if adjacent_bombs[x][y - 1] >= 0 and board[x][y - 1].clicked == False:
                 board[x][y - 1].clicked = True
-                dfs_minesweeper(x, y - 1)
+                dfs_minesweeper(x, y - 1, board)
             if adjacent_bombs[x - 1][y] >= 0 and board[x - 1][y].clicked == False:
                 board[x - 1][y].clicked = True
-                dfs_minesweeper(x - 1, y)
+                dfs_minesweeper(x - 1, y, board)
             if adjacent_bombs[x][y + 1] >= 0 and board[x][y + 1].clicked == False:
                 board[x][y + 1].clicked = True
-                dfs_minesweeper(x, y + 1)
+                dfs_minesweeper(x, y + 1, board)
             # Diagonal
             if adjacent_bombs[x + 1][y + 1] >= 0 and board[x + 1][y + 1].clicked == False:
                 board[x + 1][y + 1].clicked = True
-                dfs_minesweeper(x + 1, y + 1)
+                dfs_minesweeper(x + 1, y + 1, board)
             if adjacent_bombs[x - 1][y + 1] >= 0 and board[x - 1][y + 1].clicked == False:
                 board[x - 1][y + 1].clicked = True
-                dfs_minesweeper(x - 1, y + 1)
+                dfs_minesweeper(x - 1, y + 1, board)
             if adjacent_bombs[x + 1][y - 1] >= 0 and board[x + 1][y - 1].clicked == False:
                 board[x + 1][y - 1].clicked = True
-                dfs_minesweeper(x + 1, y - 1)
+                dfs_minesweeper(x + 1, y - 1, board)
             if adjacent_bombs[x - 1][y - 1] >= 0 and board[x - 1][y - 1].clicked == False:
                 board[x - 1][y - 1].clicked = True
-                dfs_minesweeper(x - 1, y - 1)
-
-
-def dfs_minesweeper_score(x, y):
-    if adjacent_bombs[x][y] != 0 or scoreboard[x][y].marked:
-        return  # Only perform search if the tile clicked was an empty one (AKA no numbers or mines).
-    if x == 0:
-        if y == 0:
-            if scoreboard[1][0].clicked == False and adjacent_bombs[1][0] >= 0:
-                scoreboard[1][0].clicked = True
-                dfs_minesweeper_score(1, 0)
-            if scoreboard[0][1].clicked == False and adjacent_bombs[0][1] >= 0:
-                scoreboard[0][1].clicked = True
-                dfs_minesweeper_score(0, 1)
-            if scoreboard[1][1].clicked == False and adjacent_bombs[1][1] >= 0:
-                scoreboard[1][1].clicked = True
-                dfs_minesweeper_score(x + 1, y + 1)
-        elif y + 1 == len(adjacent_bombs[x]):
-            if scoreboard[1][y].clicked == False and adjacent_bombs[1][y] >= 0:
-                scoreboard[1][y].clicked = True
-                dfs_minesweeper_score(1, y)
-            if scoreboard[0][y - 1].clicked == False and adjacent_bombs[0][y - 1] >= 0:
-                scoreboard[0][y - 1].clicked = True
-                dfs_minesweeper_score(0, y - 1)
-            if scoreboard[1][y - 1].clicked == False and adjacent_bombs[1][y - 1] >= 0:
-                scoreboard[1][y - 1].clicked = True
-                dfs_minesweeper_score(x + 1, y - 1)
-        else:
-            # Cardinal
-            if scoreboard[x][y - 1].clicked == False and adjacent_bombs[x][y - 1] >= 0:
-                scoreboard[x][y - 1].clicked = True
-                dfs_minesweeper_score(x, y - 1)
-            if scoreboard[x][y + 1].clicked == False and adjacent_bombs[x][y + 1] >= 0:
-                scoreboard[x][y + 1].clicked = True
-                dfs_minesweeper_score(x, y + 1)
-            if scoreboard[x + 1][y].clicked == False and adjacent_bombs[x + 1][y] >= 0:
-                scoreboard[x + 1][y].clicked = True
-                dfs_minesweeper_score(x + 1, y)
-            # Diagonal
-            if scoreboard[x + 1][y - 1].clicked == False and adjacent_bombs[x + 1][y - 1] >= 0:
-                scoreboard[x + 1][y - 1].clicked = True
-                dfs_minesweeper_score(x + 1, y + 1)
-            if scoreboard[x + 1][y + 1].clicked == False and adjacent_bombs[x + 1][y + 1] >= 0:
-                scoreboard[x + 1][y + 1].clicked = True
-                dfs_minesweeper_score(x + 1, y + 1)
-    elif x + 1 == len(adjacent_bombs):
-        if y == 0:
-            if scoreboard[x - 1][0].clicked == False and adjacent_bombs[x - 1][0] >= 0:
-                scoreboard[x - 1][0].clicked = True
-                dfs_minesweeper_score(x - 1, 0)
-            if scoreboard[x][1].clicked == False and adjacent_bombs[x][1] >= 0:
-                scoreboard[x][1].clicked = True
-                dfs_minesweeper_score(x, 1)
-            if scoreboard[x - 1][1].clicked == False and adjacent_bombs[x - 1][1] >= 0:
-                scoreboard[x - 1][1].clicked = True
-                dfs_minesweeper_score(x - 1, y + 1)
-        elif y + 1 == len(adjacent_bombs[x]):
-            if adjacent_bombs[x - 1][y] >= 0 and scoreboard[x - 1][y].clicked == False:
-                scoreboard[x - 1][y].clicked = True
-                dfs_minesweeper_score(x - 1, y)
-            if adjacent_bombs[x][y - 1] >= 0 and scoreboard[x][y - 1].clicked == False:
-                scoreboard[x][y - 1].clicked = True
-                dfs_minesweeper_score(x, y - 1)
-            if adjacent_bombs[x - 1][y - 1] >= 0 and scoreboard[x - 1][y - 1].clicked == False:
-                scoreboard[x - 1][y - 1].clicked = True
-                dfs_minesweeper_score(x - 1, y - 1)
-        else:
-            # Cardinal
-            if adjacent_bombs[x][y - 1] >= 0 and scoreboard[x][y - 1].clicked == False:
-                scoreboard[x][y - 1].clicked = True
-                dfs_minesweeper_score(x, y - 1)
-            if adjacent_bombs[x][y + 1] >= 0 and scoreboard[x][y + 1].clicked == False:
-                scoreboard[x][y + 1].clicked = True
-                dfs_minesweeper_score(x, y + 1)
-            if adjacent_bombs[x - 1][y] >= 0 and scoreboard[x - 1][y].clicked == False:
-                scoreboard[x - 1][y].clicked = True
-                dfs_minesweeper_score(x - 1, y)
-            # Diagonal
-            if adjacent_bombs[x - 1][y - 1] >= 0 and scoreboard[x - 1][y - 1].clicked == False:
-                scoreboard[x - 1][y - 1].clicked = True
-                dfs_minesweeper_score(x - 1, y - 1)
-            if adjacent_bombs[x - 1][y + 1] >= 0 and scoreboard[x - 1][y + 1].clicked == False:
-                scoreboard[x - 1][y + 1].clicked = True
-                dfs_minesweeper_score(x - 1, y + 1)
-    else:
-        if y == 0:
-            # Cardinal
-            if adjacent_bombs[x + 1][y] >= 0 and scoreboard[x + 1][y].clicked == False:
-                scoreboard[x + 1][y].clicked = True
-                dfs_minesweeper_score(x + 1, y)
-            if adjacent_bombs[x][y + 1] >= 0 and scoreboard[x][y + 1].clicked == False:
-                scoreboard[x][y + 1].clicked = True
-                dfs_minesweeper_score(x, y + 1)
-            if adjacent_bombs[x - 1][y] >= 0 and scoreboard[x - 1][y].clicked == False:
-                scoreboard[x - 1][y].clicked = True
-                dfs_minesweeper_score(x - 1, y)
-            # Diagonal
-            if adjacent_bombs[x + 1][y + 1] >= 0 and scoreboard[x + 1][y + 1].clicked == False:
-                scoreboard[x + 1][y + 1].clicked = True
-                dfs_minesweeper_score(x + 1, y + 1)
-            if adjacent_bombs[x - 1][y + 1] >= 0 and scoreboard[x - 1][y + 1].clicked == False:
-                scoreboard[x - 1][y + 1].clicked = True
-                dfs_minesweeper_score(x - 1, y + 1)
-        elif y + 1 == len(adjacent_bombs[x]):
-            if adjacent_bombs[x + 1][y] >= 0 and scoreboard[x + 1][y].clicked == False:
-                scoreboard[x + 1][y].clicked = True
-                dfs_minesweeper_score(x + 1, y)
-            if adjacent_bombs[x][y - 1] >= 0 and scoreboard[x][y - 1].clicked == False:
-                scoreboard[x][y - 1].clicked = True
-                dfs_minesweeper_score(x, y - 1)
-            if adjacent_bombs[x - 1][y] >= 0 and scoreboard[x - 1][y].clicked == False:
-                scoreboard[x - 1][y].clicked = True
-                dfs_minesweeper_score(x - 1, y)
-            # Diagonal
-            if adjacent_bombs[x + 1][y - 1] >= 0 and scoreboard[x + 1][y - 1].clicked == False:
-                scoreboard[x + 1][y - 1].clicked = True
-                dfs_minesweeper_score(x + 1, y - 1)
-            if adjacent_bombs[x - 1][y - 1] >= 0 and scoreboard[x - 1][y - 1].clicked == False:
-                scoreboard[x - 1][y - 1].clicked = True
-                dfs_minesweeper_score(x - 1, y - 1)
-        else:
-            # Cardinal
-            if adjacent_bombs[x + 1][y] >= 0 and scoreboard[x + 1][y].clicked == False:
-                scoreboard[x + 1][y].clicked = True
-                dfs_minesweeper_score(x + 1, y)
-            if adjacent_bombs[x][y - 1] >= 0 and scoreboard[x][y - 1].clicked == False:
-                scoreboard[x][y - 1].clicked = True
-                dfs_minesweeper_score(x, y - 1)
-            if adjacent_bombs[x - 1][y] >= 0 and scoreboard[x - 1][y].clicked == False:
-                scoreboard[x - 1][y].clicked = True
-                dfs_minesweeper_score(x - 1, y)
-            if adjacent_bombs[x][y + 1] >= 0 and scoreboard[x][y + 1].clicked == False:
-                scoreboard[x][y + 1].clicked = True
-                dfs_minesweeper_score(x, y + 1)
-            # Diagonal
-            if adjacent_bombs[x + 1][y + 1] >= 0 and scoreboard[x + 1][y + 1].clicked == False:
-                scoreboard[x + 1][y + 1].clicked = True
-                dfs_minesweeper_score(x + 1, y + 1)
-            if adjacent_bombs[x - 1][y + 1] >= 0 and scoreboard[x - 1][y + 1].clicked == False:
-                scoreboard[x - 1][y + 1].clicked = True
-                dfs_minesweeper_score(x - 1, y + 1)
-            if adjacent_bombs[x + 1][y - 1] >= 0 and scoreboard[x + 1][y - 1].clicked == False:
-                scoreboard[x + 1][y - 1].clicked = True
-                dfs_minesweeper_score(x + 1, y - 1)
-            if adjacent_bombs[x - 1][y - 1] >= 0 and scoreboard[x - 1][y - 1].clicked == False:
-                scoreboard[x - 1][y - 1].clicked = True
-                dfs_minesweeper_score(x - 1, y - 1)
+                dfs_minesweeper(x - 1, y - 1, board)
                 
 
 def min_clicks():
@@ -496,7 +344,7 @@ def min_clicks():
         for x in range(len(scoreboard[y])):
             if adjacent_bombs[y][x] == 0 and scoreboard[y][x].clicked == False:
                 minimum += 1
-                dfs_minesweeper_score(y, x)
+                dfs_minesweeper(x, y, scoreboard)
     for y in range(len(scoreboard)):
         for x in range(len(scoreboard[y])):
             if adjacent_bombs[y][x] > 0 and scoreboard[y][x].clicked == False:
@@ -506,8 +354,7 @@ def min_clicks():
 
 if difficulty != -1:
     board = [[Cell(minesweeper_grid[y][x]) for x in range(grid_sizes[difficulty][1])] for y in range(grid_sizes[difficulty][0])]
-    scoreboard = [[Score_Cell(minesweeper_grid[y][x]) for x in range(grid_sizes[difficulty][1])] for y in
-             range(grid_sizes[difficulty][0])]
+    scoreboard = copy.deepcopy(board)
     minimum = min_clicks()
 
 # Below for loop reveals solution, but I'll disable it on submission
@@ -585,7 +432,7 @@ def minesweeper():
                                     pygame.draw.rect(screen, color, (ix * 40 + 1, iy * 40 + 161, 38, 38))
                                     pygame.display.update()
                         else:
-                            dfs_minesweeper(row, col)  # Find all safe adjacent blocks
+                            dfs_minesweeper(row, col, board)  # Find all safe adjacent blocks
                             finished = True
                             for x in board:
                                 for y in x:
