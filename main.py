@@ -193,7 +193,7 @@ game_over = False
 
 
 def dfs_minesweeper(x, y, board):
-    if adjacent_bombs[x][y] != 0 or board[x][y].marked:
+    if adjacent_bombs[x][y] != 0 or board[x][y].marked or y >= len(board) or x >= len(board[y]):
         return  # Only perform search if the tile clicked was an empty one (AKA no numbers or mines).
     if x == 0:
         if y == 0:
@@ -344,7 +344,7 @@ def min_clicks():
         for x in range(len(scoreboard[y])):
             if adjacent_bombs[y][x] == 0 and scoreboard[y][x].clicked == False:
                 minimum += 1
-                dfs_minesweeper(x, y, scoreboard)
+                dfs_minesweeper(y, x, scoreboard)
     for y in range(len(scoreboard)):
         for x in range(len(scoreboard[y])):
             if adjacent_bombs[y][x] > 0 and scoreboard[y][x].clicked == False:
