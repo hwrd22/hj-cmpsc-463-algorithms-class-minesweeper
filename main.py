@@ -254,7 +254,7 @@ def dfs_minesweeper(x, y, board):
                 dfs_minesweeper(x, y - 1, board)
             if adjacent_bombs[x - 1][y - 1] >= 0 and board[x - 1][y - 1].clicked == False:
                 board[x - 1][y - 1].clicked = True
-                dfs_minesweeper(x - 1, y - 1), board
+                dfs_minesweeper(x - 1, y - 1, board)
         else:
             # Cardinal
             if adjacent_bombs[x][y - 1] >= 0 and board[x][y - 1].clicked == False:
